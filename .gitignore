@@ -1,0 +1,4 @@
+__pycache__/
+manictime_loader/__pycache__/
+local_notebooks/
+*.ipynb
