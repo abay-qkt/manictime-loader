@@ -13,36 +13,10 @@ class ManicTimeLoader():
         if not mtc_path:
             self.mtc_path = "C:/Program Files (x86)/ManicTime"
 
-    def get_mtc(self,schema,from_date=None,to_date=None,save_dir=None, save_csv=False):
-        if(schema not in ["ComputerUsage","Applications","Documents"]):
-            print("Failed")
-            return
-        
-        # コマンドの生成
-        if(save_dir==None):
-            file_name = "ManicTime_"+schema+"_"+datetime.datetime.now().strftime('%Y%m%d%H%M%S')+".csv"
-            save_dir = str(self.mtc_path/file_name)
-        cmd = ["mtc","export","ManicTime/"+schema,save_dir]
-        if(from_date):
-            cmd.append("/fd:"+from_date)
-        if(to_date):
-            cmd.append("/td:"+to_date)    
-        
-        # コマンドの実行
-        print(" ".join(cmd))
-        proc = subprocess.run(cmd, cwd=self.mtc_path, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        print(proc.stdout.decode("cp932"))
-        
-        if(save_csv): # CSVを保存したまま終了
-            return
-        else: # CSVは削除してDataFrameを返す
-            r_df = pd.read_csv(save_dir,dtype=str)
-            r_df["Start"] = pd.to_datetime(r_df["Start"])
-            r_df["End"] = pd.to_datetime(r_df["End"])
-            r_df["Duration"] = pd.to_timedelta(r_df["Duration"])
-            subprocess.run(["del",save_dir], shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-            return r_df
-
+    def read_db(self,schema,from_date=None,to_date=None):
+        query = self.get_query(schema,from_date,to_date)
+        df = pd.read_sql(query,self.engine,parse_dates=["StartLocalTime","EndLocalTime"])
+        return df
 
     def get_query(self,schema,from_date=None,to_date=None):
         
@@ -81,10 +55,33 @@ class ManicTimeLoader():
             {0[5]}
         """.format(arg_str)
         return query
-
-    def read_db(self,schema,from_date=None,to_date=None):
-        query = self.get_query(schema,from_date,to_date)
-        df = pd.read_sql(query,self.engine,parse_dates=["StartLocalTime","EndLocalTime"])
-        return df
-
-    
+   
+    def get_mtc(self,schema,from_date=None,to_date=None,save_dir=None, save_csv=False):
+        if(schema not in ["ComputerUsage","Applications","Documents"]):
+            print("Failed")
+            return
+        
+        # コマンドの生成
+        if(save_dir==None):
+            file_name = "ManicTime_"+schema+"_"+datetime.datetime.now().strftime('%Y%m%d%H%M%S')+".csv"
+            save_dir = str(self.mtc_path/file_name)
+        cmd = ["mtc","export","ManicTime/"+schema,save_dir]
+        if(from_date):
+            cmd.append("/fd:"+from_date)
+        if(to_date):
+            cmd.append("/td:"+to_date)    
+        
+        # コマンドの実行
+        print(" ".join(cmd))
+        proc = subprocess.run(cmd, cwd=self.mtc_path, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        print(proc.stdout.decode("cp932"))
+        
+        if(save_csv): # CSVを保存したまま終了
+            return
+        else: # CSVは削除してDataFrameを返す
+            r_df = pd.read_csv(save_dir,dtype=str)
+            r_df["Start"] = pd.to_datetime(r_df["Start"])
+            r_df["End"] = pd.to_datetime(r_df["End"])
+            r_df["Duration"] = pd.to_timedelta(r_df["Duration"])
+            subprocess.run(["del",save_dir], shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            return r_df
