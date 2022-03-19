@@ -85,3 +85,8 @@ class ManicTimeLoader():
             r_df["Duration"] = pd.to_timedelta(r_df["Duration"])
             subprocess.run(["del",save_dir], shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
             return r_df
+
+    def mtc_help(self):
+        help_cmd = ["mtc","help","export"]
+        proc_help = subprocess.run(help_cmd, cwd=self.mtc_path, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+        print(proc_help.stdout.decode("cp932"))
