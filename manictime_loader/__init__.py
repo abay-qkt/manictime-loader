@@ -1,1 +1,1 @@
-import manictime_loader
+from manictime_loader._manictime_loader import ManicTimeLoader
