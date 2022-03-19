@@ -14,12 +14,19 @@ class ManicTimeLoader():
             self.mtc_path = "C:/Program Files (x86)/ManicTime"
 
     def read_db(self,schema,from_date=None,to_date=None):
+        """
+        DataFrameを返す。
+        SQLiteを使用。
+        """
         query = self.get_query(schema,from_date,to_date)
         df = pd.read_sql(query,self.engine,parse_dates=["StartLocalTime","EndLocalTime"])
         return df
 
     def get_query(self,schema,from_date=None,to_date=None):
-        
+        """
+        SQL文を生成。
+        http://support.manictime.com/knowledgebase/articles/900645-sample-sql-queries-to-query-and-export-data-from-t
+        """        
         # 抽出期間
         localtime = ""
         if(to_date):
@@ -57,6 +64,11 @@ class ManicTimeLoader():
         return query
    
     def get_mtc(self,schema,from_date=None,to_date=None,save_dir=None, save_csv=False):
+        """
+        DataFrameを返す。
+        コマンドラインから実行。
+        http://support.manictime.com/knowledgebase/articles/686238-export
+        """
         if(schema not in ["ComputerUsage","Applications","Documents"]):
             print("Failed")
             return
