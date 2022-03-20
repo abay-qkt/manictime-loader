@@ -5,6 +5,12 @@ import subprocess
 import datetime
 class ManicTimeLoader():
     def __init__(self,db_path=None,mtc_path=None):
+        """
+        Parameters
+        ----------
+        db_path : str
+            ManicTimeReports.dbへのpath。
+        """
         if not db_path:
             self.db_path = "sqlite:///{}/AppData/Local/Finkit/ManicTime/ManicTimeReports.db"\
                             .format(str(Path.home()).replace("\\","/"))
@@ -15,8 +21,21 @@ class ManicTimeLoader():
 
     def read_db(self,schema,from_date=None,to_date=None):
         """
-        DataFrameを返す。
-        SQLiteを使用。
+        各スキーマのデータを返す
+
+        Parameters
+        ----------
+        schema : str
+            スキーマ。"Applications","Documents","ComputerUsage"のいずれか
+        from_date : str
+            抽出期間・開始時点。例："2021-01-01"
+        to_date : str
+            抽出期間・終了時点。例："2022-01-01"
+
+        Returns : 
+        -------
+        df : DataFrame
+            そのスキーマのデータ。
         """
         query = self.get_query(schema,from_date,to_date)
         df = pd.read_sql(query,self.engine,parse_dates=["StartLocalTime","EndLocalTime"])
@@ -99,6 +118,9 @@ class ManicTimeLoader():
             return r_df
 
     def mtc_help(self):
+        """
+        コマンドラインから実行するときのhelpを表示。
+        """
         help_cmd = ["mtc","help","export"]
         proc_help = subprocess.run(help_cmd, cwd=self.mtc_path, shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
         print(proc_help.stdout.decode("cp932"))
